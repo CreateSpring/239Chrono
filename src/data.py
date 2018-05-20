@@ -2,8 +2,47 @@ import numpy as np
 import h5py
 from sklearn.preprocessing import StandardScaler
 from scipy import signal as sig
+from pathlib import Path
+from net import RNN
+
+
 
 # LOADING
+def check_load(p="project_datasets/"):
+    return Path(p+"pre_X.np").exists() and Path(p+"pre_Xval.np").exists() and Path(p+"pre_Xtrain.np").exists()
+
+
+def save_pre_processed(X, y, Xval, yval, Xtest, ytest, p="project_datasets/"):
+    dataset = h5py.File(p+'pre_data.mat', 'w')
+    dataset.create_dataset('train_x', data=X)
+    dataset.create_dataset('train_y', data=y)
+
+    dataset.create_dataset('val_x', data=Xval)
+    dataset.create_dataset('val_y', data=yval)
+
+    dataset.create_dataset('test_x', data=Xtest)
+    dataset.create_dataset('test_y', data=ytest)
+
+    dataset.close()
+
+
+
+def load_pre_processed(folder_path="project_datasets/"):
+    dataset = h5py.File(folder_path+'pre_X.mat', 'r')
+
+    X = np.copy(dataset.get('train_x'))
+    y = np.copy(dataset.get('train_y'))
+
+    Xv = np.copy(dataset.get('val_x'))
+    yv = np.copy(dataset.get('val_y'))
+
+    Xt = np.copy(dataset.get('test_x'))
+    yt = np.copy(dataset.get('test_y'))
+
+    return X, y, Xv, yv, Xt, yt
+
+
+
 
 def load(number, folder_path="project_datasets/"):
     folder_path += 'A0%dT_slice.mat' % number
