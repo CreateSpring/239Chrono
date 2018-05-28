@@ -9,8 +9,7 @@ from net import RNN
 
 # LOADING
 def check_load(p="project_datasets/"):
-    return Path(p+"pre_X.np").exists() and Path(p+"pre_Xval.np").exists() and Path(p+"pre_Xtrain.np").exists()
-
+    return Path(p+"pre_data.mat").exists()
 
 def save_pre_processed(X, y, Xval, yval, Xtest, ytest, p="project_datasets/"):
     dataset = h5py.File(p+'pre_data.mat', 'w')
@@ -28,7 +27,7 @@ def save_pre_processed(X, y, Xval, yval, Xtest, ytest, p="project_datasets/"):
 
 
 def load_pre_processed(folder_path="project_datasets/"):
-    dataset = h5py.File(folder_path+'pre_X.mat', 'r')
+    dataset = h5py.File(folder_path+'pre_data.mat', 'r')
 
     X = np.copy(dataset.get('train_x'))
     y = np.copy(dataset.get('train_y'))
