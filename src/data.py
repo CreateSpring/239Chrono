@@ -160,7 +160,7 @@ def augment_frequency(X, freqz, ceiling=True):
     if ceiling:
         d = b * N
     else:
-        d = b*(N-1)
+        d = b * (N-1)
 
     Xf = np.zeros((a, d, c))
     for i in range(0, N):

@@ -14,7 +14,7 @@ class RNN:
         self.input = Input(self.input_shape)
 
 
-    def build_model(self, inception=True, res=True, maxpool = True, avgpool = False, batchnorm=True):
+    def build_model(self, inception=True, res=True, strided=False, maxpool=True, avgpool=False, batchnorm=True):
         self.i = 0
         pad = 'same'
         padp = 'same'
@@ -25,16 +25,16 @@ class RNN:
 
         r = kr.regularizers.l2(self.config['reg'])
 
-        a = self.input
-
+        c = self.input
+        stride_size = self.config['strides'] if strided else 1
 
         if inception:
-            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad,
-                               activation=c_act)(a)
-            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=self.config['strides'], padding=pad,
-                               activation=c_act)(a)
-            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=self.config['strides'], padding=pad,
-                               activation=c_act)(a)
+            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad,
+                               activation=c_act)(c)
+            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=stride_size, padding=pad,
+                               activation=c_act)(c)
+            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=stride_size, padding=pad,
+                               activation=c_act)(c)
 
             c = layers.concatenate([c0, c1, c2])
 
@@ -48,11 +48,11 @@ class RNN:
 
 
 
-            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad,
+            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad,
                                activation=c_act)(c)
-            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=self.config['strides'], padding=pad,
+            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=stride_size, padding=pad,
                                activation=c_act)(c)
-            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=self.config['strides'], padding=pad,
+            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=stride_size, padding=pad,
                                activation=c_act)(c)
 
             c = layers.concatenate([c0, c1, c2])
@@ -64,13 +64,11 @@ class RNN:
                 c = layers.BatchNormalization()(c)
             c = layers.SpatialDropout1D(self.config['cnn_drop'])(c)
 
-
-
-            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad,
+            c0 = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad,
                                activation=c_act)(c)
-            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=self.config['strides'], padding=pad,
+            c1 = layers.Conv1D(self.config['filters'], kernel_size=8, strides=stride_size, padding=pad,
                                activation=c_act)(c)
-            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=self.config['strides'], padding=pad,
+            c2 = layers.Conv1D(self.config['filters'], kernel_size=32, strides=stride_size, padding=pad,
                                activation=c_act)(c)
 
             c = layers.concatenate([c0, c1, c2])
@@ -83,7 +81,7 @@ class RNN:
             c = layers.SpatialDropout1D(self.config['cnn_drop'])(c)
 
         else:   # No inception Modules
-            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad, activation=c_act)(self.input)
+            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad, activation=c_act)(self.input)
             if maxpool:
                 c = layers.MaxPooling1D(2, padding=padp)(c)
             elif avgpool:
@@ -92,7 +90,7 @@ class RNN:
                 c = layers.BatchNormalization()(c)
             c = layers.SpatialDropout1D(self.config['cnn_drop'])(c)
 
-            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad, activation=c_act)(c)
+            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad, activation=c_act)(c)
             if maxpool:
                 c = layers.MaxPooling1D(2, padding=padp)(c)
             elif avgpool:
@@ -101,7 +99,7 @@ class RNN:
                 c = layers.BatchNormalization()(c)
             c = layers.SpatialDropout1D(self.config['cnn_drop'])(c)
 
-            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=self.config['strides'], padding=pad, activation=c_act)(c)
+            c = layers.Conv1D(self.config['filters'], kernel_size=4, strides=stride_size, padding=pad, activation=c_act)(c)
             if maxpool:
                 c = layers.MaxPooling1D(2, padding=padp)(c)
             elif avgpool:
@@ -154,8 +152,6 @@ class RNN:
 
 
     # -!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!- #
-
-
     def train(self, X, y, Xv=None, yv=None, verbose=1):
         print("Training {}".format(self.model.name))
 
